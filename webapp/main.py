@@ -17,6 +17,8 @@ app.mount("/ui", StaticFiles(directory=static_path), name="ui")
 class Body(BaseModel):
     length: Union[int, None] = 20
 
+class Text(BaseModel):
+    text: str
 
 @app.get('/')
 def root():
@@ -33,5 +35,11 @@ def generate(body: Body):
         "length": 20
     }
     """
-    string = base64.b64encode(os.urandom(64))[:body.length].decode('utf-8')
+    string = base64.b64encode(os.urandom(64))[:body.length or 20].decode('utf-8')
     return {'token': string}
+# Create a FastAPI endpoint that accepts a POST request with a JSON body containing a single field called "text" and returns a checksum of the text
+@app.post('/checksum')
+def checksum(text: Text):
+    # Calculate the checksum of the text
+    checksum = hashlib.md5(text.text.encode()).hexdigest()
+    return {'checksum': checksum}
